@@ -1,0 +1,166 @@
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns:spring="http://www.w3.org/1999/XSL/Transform">
+<link href="https://www.cssscript.com/demo/sticky.css" rel="stylesheet" type="text/css"
+      xmlns:th="http://www.w3.org/1999/xhtml">
+<link
+        href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css"
+        rel="stylesheet"
+/>
+<link rel="stylesheet" href="css/fonts-google.css" />
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+
+<div class="chat-box">
+    <div class="chat-box-header">
+        <span class="chat-box-toggle"><img style="width:30px;" src="images/svg/close-btn.svg" class="material-icons"/></span>
+        <p id="conversation-title">Chat</p>
+    </div>
+    <div class="chat-box-body">
+        <div class="chat-box-overlay">
+        </div>
+        <div class="chat-logs">
+
+        </div><!--chat-log -->
+        <div class="chat-typing">
+
+        </div>
+    </div>
+    <div class="chat-input">
+            <input type="text" id="chat-input" th:placeholder="#{sidepanelchat.send.a.message}"/>
+            <button class="chat-submit" id="chat-submit"><img style="width:30px;" src="images/svg/send-msg.svg" class="material-icons"/></button>
+    </div>
+</div>
+
+<div id="new-conversation-modal" class="modal" style="display: none;width: 50vw; height: 50vh;">
+        <h1 class="modal__title" th:utext="#{sidepanelchat.add.new.conversation}"></h1>
+        <form>
+            <div class="form-group">
+                <label class="legend-top" for="name">
+                    <input th:placeholder="#{sidepanelchat.add.new.conversation.name}" type="text" id="name"/>
+                    <span class="title-span" th:utext="#{sidepanelchat.add.new.conversation.name}"></span>
+                </label>
+            </div>
+            <div class="row">
+                <label for="selected-users" th:utext="#{sidepanelchat.add.new.conversation.select.members}" style="color: #000;padding: 20px;"></label>
+                <div id="selected-users" style="margin:10px;">
+
+                </div>
+            </div>
+
+        </form>
+    <a id="save-conversation" class="standard-btn" th:utext="#{sidepanelchat.save}"></a>
+
+</div>
+
+<div id="new-message-modal" style="display: none;width: 50vw; height: 50vh;">
+    <h1 class="modal__title" th:utext="#{sidepanelchat.add.new.conversation}"></h1>
+    <form>
+    <div class="row">
+    <label for="selected-person" style="color: #000;padding: 20px;" th:utext="#{sidepanelchat.new.message.select.person}"></label>
+    <div id="selected-person" style="margin:10px;">
+
+    </div>
+    </div>
+    </form>
+    <a id="save-new-message" class="standard-btn" th:utext="#{sidepanelchat.save}">
+    </a>
+
+</div>
+
+<div class="side-bar">
+
+    <span class="side-bar-toggle"><img style="width:30px;" src="images/svg/close-btn.svg" class="material-icons"></span>
+
+    <div id="new-conversation-btn" class="message">
+        <i class="message-icon bx bx-message-square-edit"></i>
+        <span class="message-text" th:utext="#{sidepanelchat.new.conversation}"></span>
+        <span class="tooltip" th:utext="#{sidepanelchat.new.conversation}"></span>
+    </div>
+    <div id="new-message-btn" class="message">
+        <i class="message-icon bx bx-message-square-edit"></i>
+        <span class="message-text" th:utext="#{sidepanelchat.new.message}"></span>
+        <span class="tooltip" th:utext="#{sidepanelchat.new.message}"></span>
+    </div>
+
+
+    <ul class="chat-list">
+        <div class="chat-header" th:utext="#{sidepanelchat.recent.chats}"></div>
+        <div id="recent-chats" class="recent-chats"></div>
+    </ul>
+</div>
+<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/sidepanel-chat.js"></script>
+<script src="js/jquery-modal-0.9.1.js"></script>
+
+<script src="js/mustache.min.js"></script>
+<script id="tmpl_conversations" type="x-tmpl-mustache">
+{{#conversations}}
+    <li id="chat-item-{{id}}" class="chat-item" onclick="sidepanelChat.loadMessages({{id}},'{{name}}')">
+          <span class="chat-item-avatar-wrapper {{#noUnreadMessages}}has-message{{/noUnreadMessages}}">
+
+          </span>
+            <span class="chat-item-name">{{name}}</span>
+            <span class="chat-item-number">{{noUnreadMessages}}</span>
+        </li>
+{{/conversations}}
+</script>
+<script id="tmpl_users" type="x-tmpl-mustache">
+{{#users}}
+    <p>
+    <input type="checkbox" class="checkbox-round selected-users-checkbox" id="user-{{id}}">
+    <label style="color:grey;font-size:15px" for="user-{{id}}">{{firstName}} {{lastName}}</label>
+  </p>
+{{/users}}
+</script>
+<script id="tmpl_persons" type="x-tmpl-mustache">
+{{#users}}
+    <p>
+    <input type="radio" class="checkbox-round selected-person-checkbox" id="message-user-{{id}}" name="person">
+    <label style="color:grey;font-size:15px" for="message-user-{{id}}">{{firstName}} {{lastName}}</label>
+  </p>
+{{/users}}
+</script>
+<script id="tmpl_messages" type="x-tmpl-mustache">
+{{#messages}}
+    {{#mines}}
+    <div class="msg right-msg">
+
+      <div class="msg-bubble">
+        <div class="msg-info">
+          <div class="msg-info-name">{{userName}}</div>
+          <div class="msg-info-time">{{createdAtStr}}</div>
+        </div>
+
+        <div class="msg-text wordwrap">
+          {{content}}
+        </div>
+      </div>
+    </div>
+    {{/mines}}
+    {{^mines}}
+    <div class="msg left-msg">
+
+      <div class="msg-bubble">
+        <div class="msg-info">
+          <div class="msg-info-name">{{userName}}</div>
+          <div class="msg-info-time">{{createdAtStr}}</div>
+        </div>
+
+        <div class="msg-text wordwrap">
+          {{content}}
+        </div>
+      </div>
+    </div>
+    {{/mines}}
+{{/messages}}
+
+</script>
+
+
+</html>
+
+
+
