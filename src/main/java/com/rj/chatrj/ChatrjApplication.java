@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @SpringBootApplication
 public class ChatrjApplication {
@@ -35,6 +36,8 @@ public class ChatrjApplication {
 					.addFilterAfter(new JWTAuthorizationFilter(jdbcTemplate), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/user").permitAll()
+					.antMatchers("/chat").permitAll()
+					.antMatchers("/**/*.js", "/**/*.css", "/**/*.scss", "/**/*.html").permitAll()
 					.anyRequest().authenticated();
 		}
 
