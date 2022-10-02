@@ -51,8 +51,9 @@ public class Util {
     }
 
     public static String generateToken(JdbcTemplate db, Integer userId) throws SQLException, ClassNotFoundException {
-        String token = createJWT(userId, 3600000L);
-        db.update("insert into token(token, user_id) values (?,?)",token, userId);
+        String token = createJWT(userId, ApplicationProperties.getTokenValability());
+        java.sql.Timestamp expires = new java.sql.Timestamp(System.currentTimeMillis() + ApplicationProperties.getTokenValability());
+        db.update("insert into token(token, user_id, expires) values (?,?,?)",token, userId, expires);
         return token;
     }
 

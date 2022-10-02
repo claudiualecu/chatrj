@@ -5,6 +5,7 @@ public class ApplicationProperties {
     private static String url;
     private static String noContextToken;
     private static String systemRoot;
+    private static long tokenValability;
 
     public static String getUrl() {
         return url;
@@ -28,5 +29,14 @@ public class ApplicationProperties {
 
     public static void setSystemRoot(String systemRoot) {
         ApplicationProperties.systemRoot = systemRoot;
+    }
+
+
+    public static long getTokenValability() {
+        return tokenValability;
+    }
+
+    public static void setTokenValability(long tokenValability) {
+        ApplicationProperties.tokenValability = tokenValability;
     }
 }

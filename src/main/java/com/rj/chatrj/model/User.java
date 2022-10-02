@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class User {
 
+    private Integer id;
     private String username;
     private String password;
     private String token;
@@ -74,5 +75,13 @@ public class User {
 
     public void setUnitId(Integer unitId) {
         this.unitId = unitId;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
